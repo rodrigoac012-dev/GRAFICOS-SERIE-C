@@ -1,14 +1,6 @@
 import streamlit as st
-
-# Tenta instalar as bibliotecas automaticamente caso o Streamlit ignore o requirements.txt
-try:
-    import pandas as pd
-    import matplotlib.pyplot as plt
-except ImportError:
-    import os
-    os.system('pip install pandas matplotlib openpyxl')
-    import pandas as pd
-    import matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # 1. CONFIGURAÇÃO DA PÁGINA E ESTILO EDITORIAL (BEGE SAF)
 st.set_page_config(page_title="SAF Intelligence - Série C", layout="wide")
