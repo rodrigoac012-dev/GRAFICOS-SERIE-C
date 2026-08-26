@@ -1,6 +1,7 @@
+import streamlit as pd
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 # 1. CONFIGURAÇÃO DA PÁGINA E ESTILO EDITORIAL (BEGE SAF)
 st.set_page_config(page_title="SAF Intelligence - Série C", layout="wide")
@@ -65,37 +66,33 @@ if uploaded_file is not None:
 
     if pilar_selecionado == "Pilar 1: Ataque (Letalidade)":
         st.header("Pilar 1: Eficiência e Tomada de Decisão (Ataque)")
-        st.markdown("Este gráfico cruza a **Qualidade das Chances (xG por 90')** contra os **Gols Reais (por 90')**.")
+        st.markdown("Este gráfico interativo cruza a **Qualidade das Chances (xG por 90')** contra os **Gols Reais (por 90')**.")
 
         if 'Remates/90' in df.columns and 'Golos esperados/90' in df.columns:
-            fig, ax = plt.subplots(figsize=(10, 6), facecolor='#F5F2E7')
-            ax.set_facecolor('#F5F2E7')
+            # Criar coluna para destacar o Brusque
+            df['Destaque'] = df['Equipa'].apply(lambda x: 'Brusque SAF' if x == 'Brusque' else 'Outros Clubes')
 
-            for i, row in df.iterrows():
-                is_brusque = row.get('Equipa') == 'Brusque' or row.get('Equipe') == 'Brusque'
-                cor = '#008000' if is_brusque else '#999999'
-                tamanho = 300 if is_brusque else 80
-                borda = '#FFD700' if is_brusque else 'none'
-                
-                x = row.get('Golos esperados/90', 0)
-                y = row.get('Golos/90', 0)
-                
-                ax.scatter(x, y, s=tamanho, color=cor, edgecolors=borda, linewidth=2, alpha=0.8)
-                
-                if is_brusque and y > 0.1:
-                    ax.text(x, y + 0.02, str(row.get('Jogador', '')), fontsize=9, fontweight='bold', ha='center')
+            # Gráfico interativo com Plotly (Não precisa de bibliotecas extras)
+            fig = px.scatter(
+                df, 
+                x='Golos esperados/90', 
+                y='Golos/90',
+                color='Destaque',
+                color_discrete_map={'Brusque SAF': '#008000', 'Outros Clubes': '#999999'},
+                hover_name='Jogador',
+                text='Jogador',
+                title="Matriz de Letalidade Ofensiva"
+            )
 
-            ax.axvline(df['Golos esperados/90'].mean(), color='gray', linestyle='--', alpha=0.4)
-            ax.axhline(df['Gols/90'].mean(), color='gray', linestyle='--', alpha=0.4)
+            fig.update_traces(textposition='top center', marker=dict(size=12))
+            fig.update_layout(
+                plot_bgcolor='#F5F2E7',
+                paper_bgcolor='#F5F2E7',
+                font=dict(family='serif', color='#222222'),
+                title_font=dict(size=18, family='serif')
+            )
 
-            ax.set_title("Matriz de Letalidade Ofensiva", fontsize=14, fontweight='bold', family='serif')
-            ax.set_xlabel("Gols Esperados por 90' (xG/90)", fontsize=10)
-            ax.set_ylabel("Gols Reais por 90'", fontsize=10)
-            
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=True)
         else:
             st.error("As colunas 'Remates/90' ou 'Golos esperados/90' não foram encontradas no arquivo.")
 else:
